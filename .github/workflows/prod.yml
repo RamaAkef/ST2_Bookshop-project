@@ -1,0 +1,28 @@
+name: prod — promotion only
+
+on:
+  push:
+    branches: [prod]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/deployments/prod
+            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=${{ vars.IMAGE_VERSION }}/' .env
+            docker compose -p prod pull
+            docker compose -p prod up -d --remove-orphans
