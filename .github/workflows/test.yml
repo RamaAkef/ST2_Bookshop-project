@@ -7,27 +7,30 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install dependencies into venv
+      - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
           pip install -r requirements.txt
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Collect static files
         run: |
-          source venv/bin/activate
           python manage.py collectstatic --noinput
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
@@ -36,12 +39,15 @@ jobs:
       - name: Package artifact
         run: |
           ARTIFACT="app-test-${{ github.sha }}.tar.gz"
-          tar -czf "$ARTIFACT" \
+          tar -czf "/tmp/$ARTIFACT" \
             --exclude='.git' \
             --exclude='artifacts' \
             --exclude='*.pyc' \
             --exclude='__pycache__' \
+            --exclude='.github' \
+            --exclude='book-shop' \
             .
+          mv "/tmp/$ARTIFACT" .
           echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
 
       - name: Log in to Docker Hub
