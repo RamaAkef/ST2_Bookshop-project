@@ -7,30 +7,29 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install dependencies into venv
         run: |
+          python -m venv venv
+          source venv/bin/activate
           pip install -r requirements.txt
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Collect static files
         run: |
+          source venv/bin/activate
           python manage.py collectstatic --noinput
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
@@ -39,15 +38,13 @@ jobs:
       - name: Package artifact
         run: |
           ARTIFACT="app-${{ github.sha }}.tar.gz"
-          tar -czf "/tmp/$ARTIFACT" \
+          tar -czf "$ARTIFACT" \
             --exclude='.git' \
             --exclude='artifacts' \
             --exclude='*.pyc' \
             --exclude='__pycache__' \
-            --exclude='.github' \
-            --exclude='book-shop' \
+            --exclude="$ARTIFACT" \
             .
-          mv "/tmp/$ARTIFACT" .
           echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
 
       - name: Commit artifact to artifacts/ folder
@@ -56,8 +53,7 @@ jobs:
           cp "$ARTIFACT" artifacts/
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin dev
-          git add artifacts/
+          git add artifacts/"$ARTIFACT"
           git commit -m "ci: add artifact $ARTIFACT [skip ci]"
           git push origin dev
 
