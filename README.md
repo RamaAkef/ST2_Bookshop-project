@@ -38,7 +38,7 @@ docker compose down -v Stop and delete database (fresh start)
 docker compose exec backend python manage.py migrate Run migrations 
 docker compose exec backend python manage.py createsuperuser Create admin user 
 
-test
+
  Admin Panel
 Visit http://localhost/admin after creating a superuser.
 

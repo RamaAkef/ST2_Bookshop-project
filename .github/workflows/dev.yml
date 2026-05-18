@@ -105,3 +105,5 @@ jobs:
             docker compose -p dev up -d --remove-orphans
 
             docker image prune -af
+
+            
