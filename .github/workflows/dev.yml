@@ -38,13 +38,13 @@ jobs:
       - name: Package artifact
         run: |
           ARTIFACT="app-${{ github.sha }}.tar.gz"
-          tar -czf "$ARTIFACT" \
+          tar -czf "/tmp/$ARTIFACT" \
             --exclude='.git' \
             --exclude='artifacts' \
             --exclude='*.pyc' \
             --exclude='__pycache__' \
-            --exclude="$ARTIFACT" \
             .
+          cp "/tmp/$ARTIFACT" "$ARTIFACT"
           echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
 
       - name: Commit artifact to artifacts/ folder
