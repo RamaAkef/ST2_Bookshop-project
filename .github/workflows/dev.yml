@@ -56,6 +56,7 @@ jobs:
           cp "$ARTIFACT" artifacts/
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin dev
           git add artifacts/
           git commit -m "ci: add artifact $ARTIFACT [skip ci]"
           git push origin dev
