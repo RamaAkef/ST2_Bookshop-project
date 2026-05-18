@@ -39,7 +39,7 @@ docker compose exec backend python manage.py migrate Run migrations
 docker compose exec backend python manage.py createsuperuser Create admin user 
 
 
- Admin Panel
+Admin Panel
 Visit http://localhost/admin after creating a superuser.
 
 Lian Abu Ajamieh 20230099
