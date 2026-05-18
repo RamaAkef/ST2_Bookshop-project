@@ -19,17 +19,14 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies into venv
+      - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
           pip install -r requirements.txt
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Collect static files
         run: |
-          source venv/bin/activate
           python manage.py collectstatic --noinput
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
@@ -43,8 +40,10 @@ jobs:
             --exclude='artifacts' \
             --exclude='*.pyc' \
             --exclude='__pycache__' \
+            --exclude='.github' \
+            --exclude='book-shop' \
             .
-          cp "/tmp/$ARTIFACT" "$ARTIFACT"
+          mv "/tmp/$ARTIFACT" .
           echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
 
       - name: Commit artifact to artifacts/ folder
@@ -53,7 +52,7 @@ jobs:
           cp "$ARTIFACT" artifacts/
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add artifacts/"$ARTIFACT"
+          git add artifacts/
           git commit -m "ci: add artifact $ARTIFACT [skip ci]"
           git push origin dev
 
