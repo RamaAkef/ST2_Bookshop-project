@@ -43,7 +43,6 @@ jobs:
             --exclude='artifacts' \
             --exclude='*.pyc' \
             --exclude='__pycache__' \
-            --exclude="$ARTIFACT" \
             .
           echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
 
